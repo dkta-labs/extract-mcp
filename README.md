@@ -1,4 +1,4 @@
-# @dkta-labs/extract-mcp
+# Extract MCP
 
 MCP server for [extract.dkta.dev](https://extract.dkta.dev) — clean content extraction for AI agents via x402.
 
@@ -7,7 +7,7 @@ Extract readable markdown from any URL. Each call costs **$0.001 USDC** paid aut
 ## Installation
 
 ```bash
-npx -y @dkta-labs/extract-mcp
+npx --yes github:dkta-labs/extract-mcp
 ```
 
 ## Prerequisites
@@ -23,7 +23,7 @@ An EVM wallet private key with USDC on Base mainnet (for per-call payments).
   "mcpServers": {
     "extract": {
       "command": "npx",
-      "args": ["-y", "@dkta-labs/extract-mcp"],
+      "args": ["--yes", "github:dkta-labs/extract-mcp"],
       "env": {
         "AGENT_PRIVATE_KEY": "0xyour_private_key_here"
       }
