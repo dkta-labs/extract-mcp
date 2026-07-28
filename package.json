@@ -1,7 +1,7 @@
 {
-  "name": "@dkta0/extract-mcp",
+  "name": "@dkta-labs/extract-mcp",
   "version": "1.1.0",
-  "mcpName": "io.github.dkta0/extract",
+  "mcpName": "io.github.dkta-labs/extract-mcp",
   "description": "Clean content extraction for AI agents via x402 — URL to markdown in one call",
   "main": "index.js",
   "type": "module",
@@ -14,7 +14,7 @@
   "keywords": ["mcp", "x402", "extract", "content", "readability", "web-scraping"],
   "repository": {
     "type": "git",
-    "url": "https://github.com/dkta0/extract"
+    "url": "https://github.com/dkta-labs/extract-mcp"
   },
   "license": "MIT",
   "dependencies": {
