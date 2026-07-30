@@ -6,6 +6,7 @@ import { wrapFetchWithPayment } from 'x402-fetch';
 import { createWalletClient, http } from 'viem';
 import { privateKeyToAccount } from 'viem/accounts';
 import { base } from 'viem/chains';
+import { randomUUID } from 'node:crypto';
 
 const privateKey = process.env.AGENT_PRIVATE_KEY;
 if (!privateKey) {
@@ -31,13 +32,13 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
     {
       name: 'extract_webpage',
-      description: 'Extract clean readable text from any URL. Costs $0.001 USDC per call via x402 on Base mainnet.',
+      description: 'Extract clean readable text from a public HTTP(S) URL. Costs $0.001 USDC per call via x402 on Base mainnet.',
       inputSchema: {
         type: 'object',
         properties: {
           url: {
             type: 'string',
-            description: 'The URL to extract content from',
+            description: 'The public HTTP(S) URL to extract content from',
           },
         },
         required: ['url'],
@@ -45,7 +46,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
     },
     {
       name: 'extract_webpage_batch',
-      description: 'Extract clean readable text from multiple URLs in one call (up to 5). Each URL costs $0.001 USDC via x402 on Base mainnet.',
+      description: 'Extract clean readable text from 1 to 5 public HTTP(S) URLs for a flat $0.005 USDC via x402 on Base mainnet.',
       inputSchema: {
         type: 'object',
         properties: {
@@ -54,7 +55,7 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
             items: { type: 'string' },
             minItems: 1,
             maxItems: 5,
-            description: 'Array of URLs to extract content from (max 5)',
+            description: 'Array of public HTTP(S) URLs to extract content from (max 5)',
           },
         },
         required: ['urls'],
@@ -71,7 +72,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
     }
 
     const extractUrl = `https://extract.dkta.dev/v1/extract?url=${encodeURIComponent(url)}`;
-    const response = await fetchWithPayment(extractUrl);
+    const response = await fetchWithPayment(extractUrl, {
+      headers: { 'X-Request-ID': randomUUID() },
+    });
 
     if (!response.ok) {
       throw new Error(`Extract API error: ${response.status} ${response.statusText}`);
@@ -100,7 +103,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
     const response = await fetchWithPayment('https://extract.dkta.dev/v1/extract/batch', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', 'X-Request-ID': randomUUID() },
       body: JSON.stringify({ urls }),
     });
 
