@@ -2,11 +2,13 @@
 import { Server } from '@modelcontextprotocol/sdk/server/index.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { CallToolRequestSchema, ListToolsRequestSchema } from '@modelcontextprotocol/sdk/types.js';
-import { wrapFetchWithPayment } from 'x402-fetch';
-import { createWalletClient, http } from 'viem';
+import { x402Client } from '@x402/core/client';
+import { registerExactEvmScheme } from '@x402/evm/exact/client';
+import { wrapFetchWithPayment } from '@x402/fetch';
 import { privateKeyToAccount } from 'viem/accounts';
-import { base } from 'viem/chains';
 import { randomUUID } from 'node:crypto';
+const apiBaseUrl = process.env.EXTRACT_API_URL || 'https://extract.dkta.dev';
+
 
 const privateKey = process.env.AGENT_PRIVATE_KEY;
 if (!privateKey) {
@@ -15,16 +17,12 @@ if (!privateKey) {
 }
 
 const account = privateKeyToAccount(privateKey.startsWith('0x') ? privateKey : `0x${privateKey}`);
-const walletClient = createWalletClient({
-  account,
-  chain: base,
-  transport: http(),
-});
-
-const fetchWithPayment = wrapFetchWithPayment(fetch, walletClient);
+const paymentClient = new x402Client();
+registerExactEvmScheme(paymentClient, { signer: account });
+const fetchWithPayment = wrapFetchWithPayment(fetch, paymentClient);
 
 const server = new Server(
-  { name: 'extract-mcp', version: '1.1.0' },
+  { name: 'extract-mcp', version: '2.0.0' },
   { capabilities: { tools: {} } }
 );
 
@@ -71,7 +69,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error('url argument is required');
     }
 
-    const extractUrl = `https://extract.dkta.dev/v1/extract?url=${encodeURIComponent(url)}`;
+    const extractUrl = `${apiBaseUrl}/v1/extract?url=${encodeURIComponent(url)}`;
     const response = await fetchWithPayment(extractUrl, {
       headers: { 'X-Request-ID': randomUUID() },
     });
@@ -101,7 +99,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       throw new Error('urls array must contain at most 5 URLs');
     }
 
-    const response = await fetchWithPayment('https://extract.dkta.dev/v1/extract/batch', {
+    const response = await fetchWithPayment(`${apiBaseUrl}/v1/extract/batch`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'X-Request-ID': randomUUID() },
       body: JSON.stringify({ urls }),
