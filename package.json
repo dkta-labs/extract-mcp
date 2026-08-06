@@ -1,6 +1,7 @@
 {
   "name": "@dkta-labs/extract-mcp",
   "version": "2.0.0",
+  "packageManager": "npm@12.0.2",
   "mcpName": "io.github.dkta-labs/extract-mcp",
   "description": "Clean content extraction for AI agents via x402 — URL to markdown in one call",
   "main": "index.js",
